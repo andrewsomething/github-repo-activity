@@ -148,7 +148,37 @@ const page = `{{ $days := .Days }}
   function daysSubmit(){
     document.getElementById('days-select').submit();
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const $navbarItem = Array.prototype.slice.call(document.querySelectorAll('.repo-selector'), 0);
+    $navbarItem.forEach( el => {
+      el.addEventListener('click', () => {
+        $navbarItem.forEach( el => {
+          el.classList.remove('is-active');
+        });
+        el.classList.toggle('is-active');
+      });
+    });
+
+  });
   </script>
+
+  <style>
+    .menu {
+      position: sticky;
+      display: inline-block;
+      vertical-align: top;
+      max-height: 100vh;
+      overflow-y: auto;
+      top: 0;
+      bottom: 0;
+      padding: 30px;
+    }
+
+    .content {
+      display: inline-block;
+    }
+  </style>
 </head>
 
 <body>
@@ -178,104 +208,123 @@ const page = `{{ $days := .Days }}
       </div>
     </div>
   </section>
-
-  {{ range $repo := .Repos }}
-  <section class="section">
-    <div class="box" id={{ $repo }}>
-      <h1 class="title"> Repo: <a href="https://github.com/{{ $repo }}">{{ $repo }}</a></h1>
-      <h3 class="subtitle">New issues opened in the past {{ $days }} days</h3>
-      <div class="block">
-      {{ range $r, $activity := $report }}
-        {{ if eq $repo $r }}
-        {{if not $activity.Issues}}
-          <h4>No new issues in time range...</h4>
-        {{ else }}
-        <div id="{{ $r }}-issues" class="block">
-          <table class="table is-hoverable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Status</th>
-                <th>Age</th>
-                <th>Author</th>
-                <th>Title</th>
-              </tr>
-            </thead>
-            {{ range  $i := $activity.Issues }}
-              <tbody>
-                <tr>
-                  <td><a href={{ $i.URL }}>{{ $i.Number }}</a></td>
-                  <td>
-                    {{ if eq ($i.Status | deref) "open" }}
-                      <span class="tag is-success">
-                    {{ else if eq ($i.Status | deref) "closed" }}
-                      <span class="tag is-danger">
-                    {{ else }}
-                      <span class="tag">
-                    {{ end }}
-                    {{ $i.Status }}
-                    </span>
-                  </td>
-                  <td>{{ $i.Age }}</td>
-                  <td><a href={{ $i.Author.ProfileURL }}>{{ $i.Author.DisplayName }}</a></td>
-                  <td><a href={{ $i.URL }}>{{ $i.Title }}</a></td>
-                </tr>
-              </tbody>
+  <div class="columns">
+    <div class="column is-one-quarter">
+      <aside class="menu">
+        <p class="menu-label">
+          GitHub Repos
+        </p>
+        <div class="box">
+          <ul class="menu-list">
+            {{ range $repo := .Repos }}
+            <li ><a class="repo-selector" href="#{{ $repo }}">{{ $repo }}</a></li>
             {{ end }}
-          </table>
+          </ul>
         </div>
-        {{ end }}
-        </div>
-        {{ end }}
-      {{ end }}
+      </aside>
+    </div>
 
-      <h3 class="subtitle">New PRs opened in the past {{ $days }} days</h3>
-      <div class="block">
-      {{ range $r, $activity := $report }}
-        {{ if eq $repo $r }}
-        {{if not $activity.PullRequests}}
-        <h4>No new PRs in time range...</h4>
-        {{ else }}
-        <div id="{{ $r }}-prs" class="block">
-          <table class="table is-hoverable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Status</th>
-                <th>Age</th>
-                <th>Author</th>
-                <th>Title</th>
-              </tr>
-            </thead>
-            {{ range  $pr := $activity.PullRequests }}
-              <tbody>
-                <tr>
-                  <td><a href={{ $pr.URL }}>{{ $pr.Number }}</a></td>
-                  <td>
-                    {{ if eq ($pr.Status | deref) "open" }}
-                      <span class="tag is-success">
-                    {{ else if eq ($pr.Status | deref) "closed" }}
-                      <span class="tag is-danger">
-                    {{ else }}
-                      <span class="tag">
-                    {{ end }}
-                    {{ $pr.Status }}
-                    </span>
-                  </td>
-                  <td>{{ $pr.Age }}</td>
-                  <td><a href={{ $pr.Author.ProfileURL }}>{{ $pr.Author.DisplayName }}</a></td>
-                  <td><a href={{ $pr.URL }}>{{ $pr.Title }}</a></td>
-                </tr>
-              </tbody>
+    <div class="column">
+      {{ range $repo := .Repos }}
+      <section class="section">
+        <div class="box" id={{ $repo }}>
+          <h1 class="title"> Repo: <a href="https://github.com/{{ $repo }}">{{ $repo }}</a></h1>
+          <h3 class="subtitle">New issues opened in the past {{ $days }} days</h3>
+          <div class="block">
+          {{ range $r, $activity := $report }}
+            {{ if eq $repo $r }}
+            {{if not $activity.Issues}}
+              <h4>No new issues in time range...</h4>
+            {{ else }}
+            <div id="{{ $r }}-issues" class="block">
+              <table class="table is-hoverable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Status</th>
+                    <th>Age</th>
+                    <th>Author</th>
+                    <th>Title</th>
+                  </tr>
+                </thead>
+                {{ range  $i := $activity.Issues }}
+                  <tbody>
+                    <tr>
+                      <td><a href={{ $i.URL }}>{{ $i.Number }}</a></td>
+                      <td>
+                        {{ if eq ($i.Status | deref) "open" }}
+                          <span class="tag is-success">
+                        {{ else if eq ($i.Status | deref) "closed" }}
+                          <span class="tag is-danger">
+                        {{ else }}
+                          <span class="tag">
+                        {{ end }}
+                        {{ $i.Status }}
+                        </span>
+                      </td>
+                      <td>{{ $i.Age }}</td>
+                      <td><a href={{ $i.Author.ProfileURL }}>{{ $i.Author.DisplayName }}</a></td>
+                      <td><a href={{ $i.URL }}>{{ $i.Title }}</a></td>
+                    </tr>
+                  </tbody>
+                {{ end }}
+              </table>
+            </div>
             {{ end }}
-          </table>
+            </div>
+            {{ end }}
+          {{ end }}
+
+          <h3 class="subtitle">New PRs opened in the past {{ $days }} days</h3>
+          <div class="block">
+          {{ range $r, $activity := $report }}
+            {{ if eq $repo $r }}
+            {{if not $activity.PullRequests}}
+            <h4>No new PRs in time range...</h4>
+            {{ else }}
+            <div id="{{ $r }}-prs" class="block">
+              <table class="table is-hoverable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Status</th>
+                    <th>Age</th>
+                    <th>Author</th>
+                    <th>Title</th>
+                  </tr>
+                </thead>
+                {{ range  $pr := $activity.PullRequests }}
+                  <tbody>
+                    <tr>
+                      <td><a href={{ $pr.URL }}>{{ $pr.Number }}</a></td>
+                      <td>
+                        {{ if eq ($pr.Status | deref) "open" }}
+                          <span class="tag is-success">
+                        {{ else if eq ($pr.Status | deref) "closed" }}
+                          <span class="tag is-danger">
+                        {{ else }}
+                          <span class="tag">
+                        {{ end }}
+                        {{ $pr.Status }}
+                        </span>
+                      </td>
+                      <td>{{ $pr.Age }}</td>
+                      <td><a href={{ $pr.Author.ProfileURL }}>{{ $pr.Author.DisplayName }}</a></td>
+                      <td><a href={{ $pr.URL }}>{{ $pr.Title }}</a></td>
+                    </tr>
+                  </tbody>
+                {{ end }}
+              </table>
+            </div>
+            {{ end }}
+            </div>
+            {{ end }}
+          {{ end }}
         </div>
-        {{ end }}
-        </div>
-        {{ end }}
+      </section>
       {{ end }}
     </div>
-  </section>
-  {{ end }}
+
+  </div>
 </body>
 `

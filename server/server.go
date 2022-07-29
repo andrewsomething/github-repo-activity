@@ -229,59 +229,70 @@ const page = `{{ $days := .Days }}
       <section class="section">
         <div class="box" id={{ $repo }}>
           <h1 class="title"> Repo: <a href="https://github.com/{{ $repo }}">{{ $repo }}</a></h1>
-          <h3 class="subtitle">New issues opened in the past {{ $days }} days</h3>
           <div class="block">
-          {{ range $r, $activity := $report }}
-            {{ if eq $repo $r }}
-            {{if not $activity.Issues}}
-              <h4>No new issues in time range...</h4>
-            {{ else }}
-            <div id="{{ $r }}-issues" class="block">
-              <table class="table is-hoverable">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Status</th>
-                    <th>Age</th>
-                    <th>Author</th>
-                    <th>Title</th>
-                  </tr>
-                </thead>
-                {{ range  $i := $activity.Issues }}
-                  <tbody>
-                    <tr>
-                      <td><a href={{ $i.URL }}>{{ $i.Number }}</a></td>
-                      <td>
-                        {{ if eq ($i.Status | deref) "open" }}
-                          <span class="tag is-success">
-                        {{ else if eq ($i.Status | deref) "closed" }}
-                          <span class="tag is-danger">
-                        {{ else }}
-                          <span class="tag">
-                        {{ end }}
-                        {{ $i.Status }}
-                        </span>
-                      </td>
-                      <td>{{ $i.Age }}</td>
-                      <td><a href={{ $i.Author.ProfileURL }}>{{ $i.Author.DisplayName }}</a></td>
-                      <td><a href={{ $i.URL }}>{{ $i.Title }}</a></td>
-                    </tr>
-                  </tbody>
-                {{ end }}
-              </table>
+            {{ if not (index $report $repo) }}
+              <h3 class="subtitle">No issues opened in the past {{ $days }} days</h3>
             </div>
+            <div class="block">
+              <h3 class="subtitle">No PRs opened in the past {{ $days }} days</h3>
+            </div>
+            {{ end }}
+            {{ range $r, $activity := $report }}
+              {{ if eq $repo $r }}
+              {{if not $activity.Issues}}
+              <h3 class="subtitle">No issues opened in the past {{ $days }} days</h3>
+              {{ else }}
+              {{ $issueCount := len $activity.Issues }}
+              <h3 class="subtitle">{{ $issueCount }} new issues opened in the past {{ $days }} days</h3>
+              <div id="{{ $r }}-issues" class="block">
+                <table class="table is-hoverable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Status</th>
+                      <th>Age</th>
+                      <th>Author</th>
+                      <th>Title</th>
+                    </tr>
+                  </thead>
+                  {{ range  $i := $activity.Issues }}
+                    <tbody>
+                      <tr>
+                        <td><a href={{ $i.URL }}>{{ $i.Number }}</a></td>
+                        <td>
+                          {{ if eq ($i.Status | deref) "open" }}
+                            <span class="tag is-success">
+                          {{ else if eq ($i.Status | deref) "closed" }}
+                            <span class="tag is-danger">
+                          {{ else }}
+                            <span class="tag">
+                          {{ end }}
+                          {{ $i.Status }}
+                          </span>
+                        </td>
+                        <td>{{ $i.Age }}</td>
+                        <td><a href={{ $i.Author.ProfileURL }}>{{ $i.Author.DisplayName }}</a></td>
+                        <td><a href={{ $i.URL }}>{{ $i.Title }}</a></td>
+                      </tr>
+                    </tbody>
+                  {{ end }}
+                </table>
+              </div>
             {{ end }}
             </div>
             {{ end }}
           {{ end }}
 
-          <h3 class="subtitle">New PRs opened in the past {{ $days }} days</h3>
           <div class="block">
           {{ range $r, $activity := $report }}
             {{ if eq $repo $r }}
             {{if not $activity.PullRequests}}
-            <h4>No new PRs in time range...</h4>
+            <h3 class="subtitle">No PRs opened in the past {{ $days }} days</h3>
+            <div class="block">
             {{ else }}
+            {{ $issueCount := len $activity.PullRequests }}
+            <h3 class="subtitle">{{ $issueCount }} new PRs opened in the past {{ $days }} days</h3>
+            <div class="block">
             <div id="{{ $r }}-prs" class="block">
               <table class="table is-hoverable">
                 <thead>

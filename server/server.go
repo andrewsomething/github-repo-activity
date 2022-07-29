@@ -42,9 +42,11 @@ type server struct {
 }
 
 type pageData struct {
-	Days   int
-	Repos  []string
-	Report map[string]*ghra.RepoActivityReport
+	Days              int
+	Repos             []string
+	Report            map[string]*ghra.RepoActivityReport
+	TotalIssues       int
+	TotalPullRequests int
 }
 
 // NewServer initializes a new server.
@@ -120,9 +122,11 @@ func (srv *server) Report(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := pageData{
-		Days:   srv.options.DaysOld,
-		Repos:  srv.options.Repos,
-		Report: report,
+		Days:              srv.options.DaysOld,
+		Repos:             srv.options.Repos,
+		Report:            report.RepoActivityReports,
+		TotalIssues:       report.TotalIssues,
+		TotalPullRequests: report.TotalPullRequests,
 	}
 
 	tmpl.Execute(w, data)
@@ -187,6 +191,7 @@ const page = `{{ $days := .Days }}
       <div class="columns is-vcentered">
         <div class="column is-8">
           <h1 class="title">GitHub Activity Report</h1>
+          <h3 class="subtitle"> {{ .TotalIssues }} total issues and {{ .TotalPullRequests }} total pull requests in the past {{ $days }} days.</h2>
         </div>
         <div class="column">
 

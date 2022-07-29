@@ -55,7 +55,7 @@ func main() {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
 
-	for repo, activity := range report {
+	for repo, activity := range report.RepoActivityReports {
 		fmt.Fprintf(w, "\n## Repo: %s\n\n", repo)
 		fmt.Fprintf(w, "### New issues opened in the past %d days\n\n", options.DaysOld)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t\n", "Number", "Status", "Age", "Author", "Title", "URL")

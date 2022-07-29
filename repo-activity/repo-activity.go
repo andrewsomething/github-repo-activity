@@ -12,6 +12,12 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type ActivityReport struct {
+	RepoActivityReports map[string]*RepoActivityReport
+	TotalIssues         int
+	TotalPullRequests   int
+}
+
 type RepoActivityReport struct {
 	Issues       []IssueInfo
 	PullRequests []IssueInfo
@@ -36,7 +42,7 @@ type IssueAuthor struct {
 type RepoActivityService interface {
 	FetchIssues(string) (*[]IssueInfo, error)
 	BuildQuery(string) string
-	BuildReport() (map[string]*RepoActivityReport, error)
+	BuildReport() (*ActivityReport, error)
 }
 
 type GitHubRepoActivityOptions struct {
@@ -134,7 +140,7 @@ func (ghra *GitHubRepoActivityService) FetchIssues(issueType string) (*[]IssueIn
 	return &issueList, nil
 }
 
-func (ghra *GitHubRepoActivityService) BuildReport() (map[string]*RepoActivityReport, error) {
+func (ghra *GitHubRepoActivityService) BuildReport() (*ActivityReport, error) {
 	issues, err := ghra.FetchIssues("issue")
 	if err != nil {
 		return nil, err
@@ -145,20 +151,24 @@ func (ghra *GitHubRepoActivityService) BuildReport() (map[string]*RepoActivityRe
 		return nil, err
 	}
 
-	out := make(map[string]*RepoActivityReport)
+	repoReports := make(map[string]*RepoActivityReport)
 	for _, i := range *issues {
-		if out[i.Repo] == nil {
-			out[i.Repo] = &RepoActivityReport{}
+		if repoReports[i.Repo] == nil {
+			repoReports[i.Repo] = &RepoActivityReport{}
 		}
-		out[i.Repo].Issues = append(out[i.Repo].Issues, i)
+		repoReports[i.Repo].Issues = append(repoReports[i.Repo].Issues, i)
 	}
 
 	for _, p := range *prs {
-		if out[p.Repo] == nil {
-			out[p.Repo] = &RepoActivityReport{}
+		if repoReports[p.Repo] == nil {
+			repoReports[p.Repo] = &RepoActivityReport{}
 		}
-		out[p.Repo].PullRequests = append(out[p.Repo].PullRequests, p)
+		repoReports[p.Repo].PullRequests = append(repoReports[p.Repo].PullRequests, p)
 	}
 
-	return out, nil
+	return &ActivityReport{
+		RepoActivityReports: repoReports,
+		TotalIssues:         len(*issues),
+		TotalPullRequests:   len(*prs),
+	}, nil
 }

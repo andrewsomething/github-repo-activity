@@ -129,6 +129,7 @@ func (srv *server) Report(w http.ResponseWriter, r *http.Request) {
 		TotalPullRequests: report.TotalPullRequests,
 	}
 
+	w.Header().Set("Cache-Control", "public, maxage=600")
 	tmpl.Execute(w, data)
 }
 
